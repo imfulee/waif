@@ -33,7 +33,7 @@ num_classes = 9
 batch_size = 8
 
 # Number of epochs to train for
-num_epochs = 30
+num_epochs = 50
 
 input_size = 224
 data_transforms = {
