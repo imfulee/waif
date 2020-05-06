@@ -8,32 +8,50 @@ import torch.nn.functional as F
 #CHECK FOR GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-#TODO: make everything for GPU
-# compose transformation
-transform = transforms.Compose(
-    [transforms.Resize(256),
-     transforms.ToTensor(),
-     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+#GENERAL PARAMETERS
+#   to the ImageFolder structure
+data_dir = "./newgenpack"
+
+# Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
+model_name = "vgg"
+
+# Number of classes in the dataset
+num_classes = 9
+
+# Batch size for training (change depending on how much memory you have)
+batch_size = 8
+
+# Number of epochs to train for
+num_epochs = 15
+
+input_size = 224
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.RandomResizedCrop(input_size),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(input_size),
+        transforms.CenterCrop(input_size),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+}
 
 #define sets
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=2)
-
-testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                       download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                         shuffle=False, num_workers=2)
+# Create training and validation datasets
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+# Create training and validation dataloaders
+dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4) for x in ['train', 'val']}
 
 # define classes
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 model = models.vgg16(pretrained=True)
 print(model)
 # (fc): Linear(in_features=2048, out_features=1000, bias=True)
-model.classifier[6] = nn.Linear(4096, len(classes))
+model.classifier[6] = nn.Linear(4096, num_classes)
 
 
 criterion = nn.CrossEntropyLoss()
@@ -42,35 +60,89 @@ optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 #TRANSFORM TO CUDA
 model.to(device)
 
+for name,param in model.named_parameters():
+    if param.requires_grad == True:
+        print("\t",name)
+
 #TRAINING
-for epoch in range(2):  # loop over the dataset multiple times
+def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False):
+    since = time.time()
 
-    running_loss = 0.0
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data[0].to(device), data[1].to(device)
+    val_acc_history = []
 
-        # zero the parameter gradients
-        optimizer.zero_grad()
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
 
-        # forward + backward + optimize
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+    for epoch in range(num_epochs):
+        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('-' * 10)
 
-        # print statistics
-        running_loss += loss.item()
-        if i % 2000 == 1999:    # print every 2000 mini-batches
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
+        # Each epoch has a training and validation phase
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                model.train()  # Set model to training mode
+            else:
+                model.eval()   # Set model to evaluate mode
+
             running_loss = 0.0
+            running_corrects = 0
 
-print('Finished Training')
+            # Iterate over data.
+            for inputs, labels in dataloaders[phase]:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
 
-PATH = './FMGAN_net.pth'
-torch.save(model.state_dict(), PATH)
+                # zero the parameter gradients
+                optimizer.zero_grad()
 
-print('Saved Model')
+                # forward
+                # track history if only in train
+                with torch.set_grad_enabled(phase == 'train'):
+                    # Get model outputs and calculate loss
+                    # Special case for inception because in training it has an auxiliary output. In train
+                    #   mode we calculate the loss by summing the final output and the auxiliary output
+                    #   but in testing we only consider the final output.
+                    if is_inception and phase == 'train':
+                        # From https://discuss.pytorch.org/t/how-to-optimize-inception-model-with-auxiliary-classifiers/7958
+                        outputs, aux_outputs = model(inputs)
+                        loss1 = criterion(outputs, labels)
+                        loss2 = criterion(aux_outputs, labels)
+                        loss = loss1 + 0.4*loss2
+                    else:
+                        outputs = model(inputs)
+                        loss = criterion(outputs, labels)
 
+                    _, preds = torch.max(outputs, 1)
 
+                    # backward + optimize only if in training phase
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
+
+                # statistics
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
+
+            epoch_loss = running_loss / len(dataloaders[phase].dataset)
+            epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
+
+            print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+
+            # deep copy the model
+            if phase == 'val' and epoch_acc > best_acc:
+                best_acc = epoch_acc
+                best_model_wts = copy.deepcopy(model.state_dict())
+            if phase == 'val':
+                val_acc_history.append(epoch_acc)
+
+        print()
+
+    time_elapsed = time.time() - since
+    print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+    print('Best val Acc: {:4f}'.format(best_acc))
+
+    # load best model weights
+    model.load_state_dict(best_model_wts)
+    return model, val_acc_history
+
+model_ft, hist = train_model(model, dataloaders_dict, criterion, optimizer, num_epochs=num_epochs, is_inception=False)
