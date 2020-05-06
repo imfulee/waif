@@ -2,7 +2,9 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 import torchvision.models as models
-
+import torch.optim as optim
+import torch.nn as nn
+import torch.nn.functional as F
 #CHECK FOR GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
