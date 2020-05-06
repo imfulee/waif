@@ -50,9 +50,9 @@ model.to(device)
 #RUNNING
 with torch.no_grad():
     for j, entry in enumerate(os.scandir(data_dir)):
+        print(entry.name)
         img = Image.open(data_dir+entry.name)
-        for trans in transform:
-            img = trans(img)
+        img = transform(img)
         img = img.to(device)
         outputs = model(inputs)
         _, predicted = torch.max(outputs.data, 1)
