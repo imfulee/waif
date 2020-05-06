@@ -58,6 +58,8 @@ data_transforms = {
 #TODO Split in TWO subsets
 train_set = datasets.ImageFolder(data_dir, data_transforms['train'])
 val_set = datasets.ImageFolder(data_dir, data_transforms['val'])
+print("train_set", train_set.classes)
+print("val_set", val_set.classes)
 
 datset_size = len(train_set)
 indices = np.arange(datset_size)
@@ -69,8 +71,6 @@ test_ind = np.setdiff1d(indices, train_ind)
 
 train_set = torch.utils.data.Subset(train_set, train_ind)
 val_set = torch.utils.data.Subset(val_set, test_ind)
-print("train_set", train_set.classes)
-print("val_set", val_set.classes)
 image_datasets = {x: dset for dset, x in zip([train_set, val_set], ['train', 'val'])}
 
 # Create training and validation dataloaders
