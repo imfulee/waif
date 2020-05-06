@@ -44,7 +44,7 @@ model.eval()
 model.to(device)
 
 #CREATE SUBFOLDERS
-[os.makedirs(res_dir+sub) for sub in classes]
+[os.makedirs(res_dir+sub, exist_ok=True) for sub in classes]
 
 #RUNNING
 with torch.no_grad():
