@@ -12,10 +12,10 @@ input_size = 224
 num_classes = 9
 
 #DATA_DIR
-data_dir = '/content/drive/My Drive/stylegan2-colab/stylegan2/results/00003-generate-images'
+data_dir = '/content/drive/My Drive/stylegan2-colab/stylegan2/results/00003-generate-images/pics/'
 
 #RESULT_DIR
-res_dir = '/content/drive/My Drive/FMGAN-V2/pics/'
+res_dir = '/content/drive/My Drive/FMGAN-V2/'
 
 #CHECK FOR GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -50,8 +50,7 @@ model.to(device)
 #RUNNING
 with torch.no_grad():
     for j, entry in enumerate(os.scandir(data_dir)):
-        print(entry)
-        img = Image.open(entry.path)
+        img = Image.open(data_dir+entry.name)
         for trans in transform:
             img = trans(img)
         img = img.to(device)
