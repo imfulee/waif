@@ -77,7 +77,7 @@ dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size
 # define classes
 
 model = models.vgg16(pretrained=True)
-print(model)
+#print(model)
 # (fc): Linear(in_features=2048, out_features=1000, bias=True)
 model.classifier[6] = nn.Linear(4096, num_classes)
 
@@ -88,9 +88,9 @@ optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 #TRANSFORM TO CUDA
 model.to(device)
 
-for name,param in model.named_parameters():
-    if param.requires_grad == True:
-        print("\t",name)
+#for name,param in model.named_parameters():
+#    if param.requires_grad == True:
+#        print("\t",name)
 
 #TRAINING
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False):
