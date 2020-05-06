@@ -5,7 +5,6 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 import os
 from PIL import Image
-import shutil
 from tqdm import tqdm
 #GENERAL PARAMETERS
 input_size = 224
@@ -52,13 +51,15 @@ model.to(device)
 #RUNNING
 with torch.no_grad():
     for entry in tqdm(os.scandir(data_dir)):
-        img = Image.open(data_dir+entry.name)
-        img = transform(img)
+        img_original = Image.open(data_dir+entry.name)
+        img = transform(img_original)
         img = img.unsqueeze(0)
         inputs = img.to(device)
         outputs = model(inputs)
         _, predicted = torch.max(outputs.data, 1)
         sub_idx = predicted.cpu().numpy()[0]
         sub = classes[sub_idx]
-        shutil.copyfile(entry.path, res_dir+sub+'/'+entry.name)
+        new_img = img_original.resize((250,250))
+        new_img.save(res_dir+sub+'/'+entry.name)
+        #shutil.copyfile(entry.path, res_dir+sub+'/'+entry.name)
 
