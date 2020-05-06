@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 import torchvision.models as models
@@ -6,6 +7,8 @@ import torchvision.models as models
 #GENERAL PARAMETERS
 input_size = 224
 
+#NUMBER OF CLASSES
+num_classes = 9
 #DATA_DIR
 data_dir = '/content/drive/My Drive/stylegan2-colab/stylegan2/results/00003-generate-images'
 
@@ -24,9 +27,11 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=4,
                                          shuffle=False, num_workers=2)
 
 
+
 # LOAD MODEL
 PATH = './FMGAN_net.pth'
 model = models.vgg16(pretrained=True)
+model.classifier[6] = nn.Linear(4096, num_classes)
 model.load_state_dict(torch.load(PATH))
 model.eval()
 
