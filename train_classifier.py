@@ -174,3 +174,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
     return model, val_acc_history
 
 model_ft, hist = train_model(model, dataloaders_dict, criterion, optimizer, num_epochs=num_epochs, is_inception=False)
+
+#TODO: save model
+PATH = './FMGAN_net.pth'
+torch.save(model.state_dict(), PATH)
