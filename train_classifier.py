@@ -11,7 +11,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #TODO: make everything for GPU
 # compose transformation
 transform = transforms.Compose(
-    [transforms.Scale(256),
+    [transforms.Resize(256),
      transforms.ToTensor(),
      transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
@@ -30,8 +30,12 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=4,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-model = models.inception_v3(pretrained=True)
+model = models.vgg16(pretrained=True)
 print(model)
+# (fc): Linear(in_features=2048, out_features=1000, bias=True)
+model.classifier[6] = nn.Linear(4096, len(classes))
+
+
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
