@@ -50,7 +50,7 @@ model.to(device)
 #RUNNING
 with torch.no_grad():
     for j, entry in enumerate(os.scandir(data_dir)):
-        print(entry.path)
+        print(entry)
         img = Image.open(entry.path)
         for trans in transform:
             img = trans(img)
