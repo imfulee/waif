@@ -116,7 +116,8 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
             running_corrects = 0
 
             # Iterate over data.
-            for inputs, labels in dataloaders[phase]:
+            for it, (inputs, labels) in enumerate(dataloaders[phase]):
+                print('Iter {}/{}'.format(it, len(dataloaders[phase].dataset)))
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
