@@ -52,7 +52,7 @@ with torch.no_grad():
         inputs, labels = data[0].to(device), data[1].to(device)
         outputs = model(inputs)
         _, predicted = torch.max(outputs.data, 1)
-        print(predicted.numpy())
+        print(predicted.cpu().numpy())
         break
 #TODO: sort dataset
 
