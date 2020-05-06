@@ -53,7 +53,7 @@ with torch.no_grad():
         print(entry.name)
         img = Image.open(data_dir+entry.name)
         img = transform(img)
-        img = img.to(device)
+        inputs = img.to(device)
         outputs = model(inputs)
         _, predicted = torch.max(outputs.data, 1)
         print(predicted.cpu().numpy())
