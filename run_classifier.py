@@ -6,7 +6,7 @@ import torchvision.models as models
 import os
 from PIL import Image
 import shutil
-import tqdm
+from tqdm import tqdm
 #GENERAL PARAMETERS
 input_size = 224
 
