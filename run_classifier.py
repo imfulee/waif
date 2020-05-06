@@ -49,6 +49,7 @@ model.to(device)
 #RUNNING
 with torch.no_grad():
     for data in testloader:
+        print(inputs)
         inputs, labels = data[0].to(device), data[1].to(device)
         outputs = model(inputs)
         _, predicted = torch.max(outputs.data, 1)
