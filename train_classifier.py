@@ -64,7 +64,7 @@ indices = np.arange(datset_size)
 
 train_size = int(0.8 * datset_size)
 
-train_ind = np.choice(indices, size=train_size, replace=False)
+train_ind = np.random.choice(indices, size=train_size, replace=False)
 test_ind = np.setdiff1d(indices, train_ind)
 
 train_set = datasets.Subset(train_set, train_ind)
