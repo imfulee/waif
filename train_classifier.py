@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import time
 import os
 import copy
+from sklearn.model_selection import train_test_split
 print("PyTorch Version: ",torch.__version__)
 print("Torchvision Version: ",torchvision.__version__)
 
@@ -52,7 +53,24 @@ data_transforms = {
 
 #define sets
 # Create training and validation datasets
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+#TODO create ONE Dataset
+
+#TODO Split in TWO subsets
+train_set = datasets.ImageFolder(data_dir, data_transforms['train'])
+val_set = datasets.ImageFolder(data_dir, data_transforms['val'])
+
+datset_size = len(train_set)
+indices = np.arange(datset_size)
+
+train_size = int(0.8 * datset_size)
+
+train_ind = np.choice(indices, size=train_size, replace=False)
+test_ind = np.setdiff1d(indices, train_ind)
+
+train_set = datasets.Subset(train_set, train_ind)
+val_set = datasets.Subset(val_set, test_ind)
+image_datasets = {x: dset for dset, x in zip([train_set, val_set], ['train', 'val'])}
+
 # Create training and validation dataloaders
 dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4) for x in ['train', 'val']}
 
