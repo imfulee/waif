@@ -6,17 +6,24 @@ import torchvision.models as models
 import os
 from PIL import Image
 from tqdm import tqdm
+import argparse
 #GENERAL PARAMETERS
 input_size = 224
 
 #NUMBER OF CLASSES
-num_classes = 9
+num_classes = 12
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--inp', type=str)
+parser.add_argument('--out', type=str)
+
+args = parser.parse_args()
 
 #DATA_DIR
-data_dir = '/content/drive/My Drive/stylegan2-colab/stylegan2/results/00003-generate-images/pics/'
+data_dir = args.inp
 
 #RESULT_DIR
-res_dir = '/content/drive/My Drive/FMGAN-V2/'
+res_dir = args.out
 
 #CHECK FOR GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -33,7 +40,7 @@ transform = transforms.Compose(
 #                                         shuffle=False, num_workers=4)
 
 
-classes = ['African:Caribbean', 'Asian (Central)', 'East Asian', 'Mediterranean:Hispanic', 'Mixed Race (Black:White)', 'North African:Middle Eastern', 'Northern European', 'Pacific Islander', 'South East Asian']
+classes = ["Arabian", "African", "East Asian", "South East Asian", "Mediterranean", "Scandinavian", "East European", "Central Asian", "Central European", "UK", "South American", "Carribean"]
 
 # LOAD MODEL
 PATH = './FMGAN_net.pth'

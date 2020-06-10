@@ -14,14 +14,16 @@ from sklearn.model_selection import train_test_split
 print("PyTorch Version: ",torch.__version__)
 print("Torchvision Version: ",torchvision.__version__)
 
-
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--datadir', type=str)
+args = parser.parse_args()
 
 #CHECK FOR GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 #GENERAL PARAMETERS
 #   to the ImageFolder structure
-data_dir = "./newgenpack"
+data_dir = args.datadir
 
 # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
 model_name = "vgg"
