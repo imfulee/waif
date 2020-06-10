@@ -11,7 +11,7 @@ import argparse
 input_size = 224
 
 #NUMBER OF CLASSES
-num_classes = 12
+num_classes = 8
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--inp', type=str)
@@ -40,7 +40,7 @@ transform = transforms.Compose(
 #                                         shuffle=False, num_workers=4)
 
 
-classes = ["Arabian", "African", "East Asian", "South East Asian", "Mediterranean", "Scandinavian", "East European", "Central Asian", "Central European", "UK", "South American", "Carribean"]
+classes = ["Arabian", "African", "East Asian", "Mediterranean", "Scandinavian", "East European", "Central Asian", "Central European"]
 
 # LOAD MODEL
 PATH = './FMGAN_net.pth'
