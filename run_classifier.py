@@ -66,7 +66,7 @@ with torch.no_grad():
         _, predicted = torch.max(outputs.data, 1)
         sub_idx = predicted.cpu().numpy()[0]
         sub = classes[sub_idx]
-        new_img = img_original.resize((250,250))
-        new_img.save(res_dir+sub+'/'+entry.name)
+        #new_img = img_original.resize((250,250))
+        img_original.save(res_dir+sub+'/'+entry.name)
         #shutil.copyfile(entry.path, res_dir+sub+'/'+entry.name)
 
