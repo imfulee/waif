@@ -1,12 +1,13 @@
+import argparse
+import os
+
 import torch
 import torch.nn as nn
-import torchvision
-import torchvision.transforms as transforms
 import torchvision.models as models
-import os
+import torchvision.transforms as transforms
 from PIL import Image
 from tqdm import tqdm
-import argparse
+
 #GENERAL PARAMETERS
 input_size = 224
 
